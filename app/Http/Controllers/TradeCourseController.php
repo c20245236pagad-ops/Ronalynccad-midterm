@@ -3,63 +3,66 @@
 namespace App\Http\Controllers;
 
 use App\Models\TradeCourse;
-use Illuminate\Http\Request;
+use App\Models\Instructor;
+use App\Http\Requests\StoreTradeCourseRequest;
+use App\Http\Requests\UpdateTradeCourseRequest;
+use App\Services\TradeSchoolService;
 
 class TradeCourseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(TradeSchoolService $service)
+    {
+        $this->service = $service;
+    }
+
+    // Display all trade courses
     public function index()
     {
-        //
+        $courses = TradeCourse::with([
+            'instructor',
+            'enrollments.trainee'
+        ])->paginate(10);
+
+        return view('trade_courses.index', compact('courses'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Show create form
     public function create()
     {
-        //
+        $instructors = Instructor::all();
+
+        return view(
+            'trade_courses.create',
+            compact('instructors')
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Store a new trade course
+    public function store(StoreTradeCourseRequest $request)
     {
-        //
+        $this->service->createTradeCourse(
+            $request->validated()
+        );
+
+        return redirect()
+            ->route('trade-courses.index')
+            ->with('success', 'Trade course created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(TradeCourse $tradeCourse)
-    {
-        //
-    }
+    // Update an existing trade course
+    public function update(
+        UpdateTradeCourseRequest $request,
+        $id
+    ) {
+        $this->service->updateTradeCourse(
+            $id,
+            $request->validated()
+        );
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TradeCourse $tradeCourse)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, TradeCourse $tradeCourse)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TradeCourse $tradeCourse)
-    {
-        //
+        return redirect()
+            ->route('trade-courses.index')
+            ->with('success', 'Trade course updated successfully!');
     }
 }

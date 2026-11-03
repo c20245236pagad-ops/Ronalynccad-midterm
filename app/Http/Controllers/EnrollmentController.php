@@ -3,63 +3,79 @@
 namespace App\Http\Controllers;
 
 use App\Models\Enrollment;
-use Illuminate\Http\Request;
+use App\Models\Trainee;
+use App\Models\TradeCourse;
+use App\Http\Requests\StoreEnrollmentRequest;
+use App\Http\Requests\UpdateEnrollmentRequest;
+use App\Services\TradeSchoolService;
 
 class EnrollmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(TradeSchoolService $service)
+    {
+        $this->service = $service;
+    }
+
+    // Display all enrollments
     public function index()
     {
-        //
+        $enrollments = Enrollment::with([
+            'trainee',
+            'tradeCourse',
+            'certification'
+        ])->paginate(10);
+
+        return view(
+            'enrollments.index',
+            compact('enrollments')
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Display enrollment creation form
     public function create()
     {
-        //
+        $trainees = Trainee::all();
+
+        $courses = TradeCourse::all();
+
+        return view(
+            'enrollments.create',
+            compact('trainees', 'courses')
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Store new enrollment
+    public function store(StoreEnrollmentRequest $request)
     {
-        //
+        $this->service->createEnrollment(
+            $request->validated()
+        );
+
+        return redirect()
+            ->route('enrollments.index')
+            ->with(
+                'success',
+                'Enrollment created successfully!'
+            );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Enrollment $enrollment)
-    {
-        //
-    }
+    // Update existing enrollment
+    public function update(
+        UpdateEnrollmentRequest $request,
+        $id
+    ) {
+        $this->service->updateEnrollment(
+            $id,
+            $request->validated()
+        );
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Enrollment $enrollment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Enrollment $enrollment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Enrollment $enrollment)
-    {
-        //
+        return redirect()
+            ->route('enrollments.index')
+            ->with(
+                'success',
+                'Enrollment updated successfully!'
+            );
     }
 }

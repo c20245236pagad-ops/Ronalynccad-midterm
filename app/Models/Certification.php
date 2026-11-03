@@ -1,35 +1,24 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Certification extends Model
 {
-    public function up(): void
+    protected $fillable = [
+        'enrollment_id',
+        'cert_number',
+        'issue_date',
+        'cert_status',
+    ];
+
+    protected $casts = [
+        'issue_date' => 'date',
+    ];
+
+    public function enrollment()
     {
-        Schema::create('certifications', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('enrollment_id')
-                ->unique()
-                ->constrained('enrollments')
-                ->cascadeOnDelete();
-
-            $table->string('cert_number', 50)->nullable()->unique();
-            $table->date('issue_date')->nullable();
-
-            $table->string('cert_status', 30)
-                ->default('Needs Retake');
-
-            $table->timestamps();
-
-            $table->index('cert_status');
-        });
+        return $this->belongsTo(Enrollment::class);
     }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('certifications');
-    }
-};
+}

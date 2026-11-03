@@ -1,25 +1,18 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Trainee extends Model
 {
-    public function up(): void
-    {
-        Schema::create('trainees', function (Blueprint $table) {
-            $table->id();
-            $table->string('trainee_name', 150);
-            $table->string('trainee_email', 150)->unique();
-            $table->timestamps();
+    protected $fillable = [
+        'trainee_name',
+        'trainee_email',
+    ];
 
-            $table->index('trainee_name');
-        });
-    }
-
-    public function down(): void
+    public function enrollments()
     {
-        Schema::dropIfExists('trainees');
+        return $this->hasMany(Enrollment::class);
     }
-};
+}

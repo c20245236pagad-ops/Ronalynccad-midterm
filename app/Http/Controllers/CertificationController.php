@@ -3,63 +3,72 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certification;
-use Illuminate\Http\Request;
+use App\Models\Enrollment;
+use App\Http\Requests\StoreCertificationRequest;
+use App\Http\Requests\UpdateCertificationRequest;
+use App\Services\TradeSchoolService;
 
 class CertificationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(TradeSchoolService $service)
+    {
+        $this->service = $service;
+    }
+
+    // Display all certifications
     public function index()
     {
-        //
+        $certifications = Certification::with([
+            'enrollment.trainee',
+            'enrollment.tradeCourse'
+        ])->paginate(10);
+
+        return view(
+            'certifications.index',
+            compact('certifications')
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Show create form
     public function create()
     {
-        //
+        $enrollments = Enrollment::with([
+            'trainee',
+            'tradeCourse'
+        ])->get();
+
+        return view(
+            'certifications.create',
+            compact('enrollments')
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Store certification
+    public function store(StoreCertificationRequest $request)
     {
-        //
+        $this->service->createCertification(
+            $request->validated()
+        );
+
+        return redirect()
+            ->route('certifications.index')
+            ->with('success', 'Certification processed successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Certification $certification)
-    {
-        //
-    }
+    // Update certification
+    public function update(
+        UpdateCertificationRequest $request,
+        $id
+    ) {
+        $this->service->updateCertification(
+            $id,
+            $request->validated()
+        );
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Certification $certification)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Certification $certification)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Certification $certification)
-    {
-        //
+        return redirect()
+            ->route('certifications.index')
+            ->with('success', 'Certification updated successfully!');
     }
 }

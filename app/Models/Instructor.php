@@ -1,24 +1,17 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Instructor extends Model
 {
-    public function up(): void
-    {
-        Schema::create('instructors', function (Blueprint $table) {
-            $table->id();
-            $table->string('instructor_name', 150);
-            $table->timestamps();
+    protected $fillable = [
+        'instructor_name',
+    ];
 
-            $table->index('instructor_name');
-        });
-    }
-
-    public function down(): void
+    public function tradeCourses()
     {
-        Schema::dropIfExists('instructors');
+        return $this->hasMany(TradeCourse::class);
     }
-};
+}

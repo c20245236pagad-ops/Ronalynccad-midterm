@@ -1,32 +1,25 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class TradeCourse extends Model
 {
-    public function up(): void
+    protected $fillable = [
+        'instructor_id',
+        'course_name',
+        'training_hours',
+        'passing_grade',
+    ];
+
+    public function instructor()
     {
-        Schema::create('trade_courses', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('instructor_id')
-                ->constrained('instructors')
-                ->restrictOnDelete();
-
-            $table->string('course_name', 150);
-            $table->unsignedInteger('training_hours');
-            $table->decimal('passing_grade', 5, 2);
-
-            $table->timestamps();
-
-            $table->index('course_name');
-        });
+        return $this->belongsTo(Instructor::class);
     }
 
-    public function down(): void
+    public function enrollments()
     {
-        Schema::dropIfExists('trade_courses');
+        return $this->hasMany(Enrollment::class);
     }
-};
+}

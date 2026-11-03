@@ -1,34 +1,29 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Enrollment extends Model
 {
-    public function up(): void
+    protected $fillable = [
+        'trainee_id',
+        'trade_course_id',
+        'assessment_score',
+    ];
+
+    public function trainee()
     {
-        Schema::create('enrollments', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('trainee_id')
-                ->constrained('trainees')
-                ->cascadeOnDelete();
-
-            $table->foreignId('trade_course_id')
-                ->constrained('trade_courses')
-                ->restrictOnDelete();
-
-            $table->decimal('assessment_score', 5, 2)->nullable();
-
-            $table->timestamps();
-
-            $table->unique(['trainee_id', 'trade_course_id']);
-        });
+        return $this->belongsTo(Trainee::class);
     }
 
-    public function down(): void
+    public function tradeCourse()
     {
-        Schema::dropIfExists('enrollments');
+        return $this->belongsTo(TradeCourse::class);
     }
-};
+
+    public function certification()
+    {
+        return $this->hasOne(Certification::class);
+    }
+}

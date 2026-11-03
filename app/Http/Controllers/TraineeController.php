@@ -3,63 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trainee;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreTraineeRequest;
+use App\Http\Requests\UpdateTraineeRequest;
+use App\Services\TradeSchoolService;
 
 class TraineeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(TradeSchoolService $service)
+    {
+        $this->service = $service;
+    }
+
+    // Display all trainees
     public function index()
     {
-        //
+        $trainees = Trainee::with([
+            'enrollments.tradeCourse',
+            'enrollments.certification'
+        ])->paginate(10);
+
+        return view(
+            'trainees.index',
+            compact('trainees')
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Show create form
     public function create()
     {
-        //
+        return view('trainees.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Store trainee
+    public function store(StoreTraineeRequest $request)
     {
-        //
+        $this->service->createTrainee(
+            $request->validated()
+        );
+
+        return redirect()
+            ->route('trainees.index')
+            ->with('success', 'Trainee created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Trainee $trainee)
-    {
-        //
-    }
+    // Update trainee
+    public function update(
+        UpdateTraineeRequest $request,
+        $id
+    ) {
+        $this->service->updateTrainee(
+            $id,
+            $request->validated()
+        );
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Trainee $trainee)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Trainee $trainee)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Trainee $trainee)
-    {
-        //
+        return redirect()
+            ->route('trainees.index')
+            ->with('success', 'Trainee updated successfully!');
     }
 }
